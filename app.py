@@ -60,6 +60,7 @@ def view_files():
 
 @app.route('/view_files/<path:path>')
 def view_files(path = '.'):
+    submitted = bottle.request.query.submit
     access_token_key = bottle.request.get_cookie('access_token_key') 
     access_token = TOKEN_STORE[access_token_key] 
     client = get_client(access_token) 
@@ -70,6 +71,10 @@ def view_files(path = '.'):
     f, metadata = client.get_file_and_metadata(path)
     text = f.read()
     context['text'] = text
+    if submitted:
+        context['submit_message'] = 'Submission successful!'
+    else:
+        context['submit_message'] = ''
     return pystache2.render_file('read.mustache', context)
 
 @app.post('/submission')
@@ -80,8 +85,9 @@ def submission():
     access_token = TOKEN_STORE[access_token_key] 
     client = get_client(access_token) 
     str_file = StringIO(forms['submission'])
-    client.put_file(forms['filepath'], str_file)#, parent_rev = forms['rev'])
-    return "Submission successful!"
+    print forms['rev']
+    client.put_file(forms['filepath'], str_file, overwrite = True)#,parent_rev = forms['rev'])
+    bottle.redirect('/view_files/%s?submit=True'%forms['filepath'])
 
 if __name__ == '__main__':
     app.run(host = 'localhost', port = 8080, debug = True)
