@@ -1,3 +1,4 @@
+from cStringIO import StringIO
 import bottle
 import dropbox
 import pystache2
@@ -50,25 +51,35 @@ def callback(oauth_token = None):
 @app.route('/view_files')
 def view_files():
     access_token_key = bottle.request.get_cookie('access_token_key') 
-    print access_token_key
     access_token = TOKEN_STORE[access_token_key] 
     client = get_client(access_token) 
     context = client.metadata('.') 
     print str(context)
-    return pystache2.render_file('viewfiles.mustache', context)
+    return pystache2.render_file('viewfiles0.mustache', context)
 
 @app.route('/view_files/<path:path>')
 def view_files(path = '.'):
     access_token_key = bottle.request.get_cookie('access_token_key') 
-    print access_token_key
     access_token = TOKEN_STORE[access_token_key] 
     client = get_client(access_token) 
     context = client.metadata(path) 
     print str(context)
-    if context['isdir']:
+    if context['is_dir']:
         return pystache2.render_file('viewfiles.mustache', context)
-    f, metadata = client.get_file_and_metadata(path).read()
-    return pystache2.render_file('read.mustache', {'text'=f})
+    f, metadata = client.get_file_and_metadata(path)
+    text = f.read()
+    context['text'] = text
+    return pystache2.render_file('read.mustache', context)
+
+@app.post('/submission')
+def submission():
+    forms = bottle.request.params
+    print forms
+    access_token_key = bottle.request.get_cookie('access_token_key') 
+    access_token = TOKEN_STORE[access_token_key] 
+    client = get_client(access_token) 
+    str_file = StringIO(forms['submission'])
+    client.put_file(forms['filepath'], str_file, parent_rev = forms['rev'])
 
 if __name__ == '__main__':
     app.run(host = 'localhost', port = 8080, debug = True)
