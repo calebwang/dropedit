@@ -45,9 +45,7 @@ def callback(oauth_token = None):
     access_token = sess.obtain_access_token(request_token)
     TOKEN_STORE[access_token.key] = access_token
     bottle.response.set_cookie('access_token_key', access_token.key)
-    print access_token.key
-    return """hi!<br>
-    <a href="http://%s/view_files/Miscellaneous/latinch38.txt" Click here</a>"""%bottle.request.headers['host']
+    bottle.redirect('/view_files')
 
 @app.route('/view_files')
 def view_files():
@@ -56,7 +54,7 @@ def view_files():
     client = get_client(access_token) 
     context = client.metadata('.') 
     print str(context)
-    return pystache2.render_file('viewfiles0.mustache', context)
+    return pystache2.render_file('viewfiles.mustache', context)
 
 @app.route('/view_files/<path:path>')
 def view_files(path = '.'):
@@ -65,6 +63,7 @@ def view_files(path = '.'):
     access_token = TOKEN_STORE[access_token_key] 
     client = get_client(access_token) 
     context = client.metadata(path) 
+    context['fpath'] = context['path'].split('/')[-1:]
     print str(context)
     if context['is_dir']:
         return pystache2.render_file('viewfiles.mustache', context)
