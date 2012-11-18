@@ -30,7 +30,7 @@ def login():
 
     callback = "http://%s/callback" % (bottle.request.headers['host'])
     url = sess.build_authorize_url(request_token, oauth_callback=callback)
-    prompt = """Click <a href="%s">here</a> to link with Dropbox."""
+    prompt = """<a href="%s">Login to Dropbox.</a>"""
     return prompt % url
 
 @app.route('/callback')
