@@ -53,7 +53,6 @@ def view_files():
     access_token = TOKEN_STORE[access_token_key] 
     client = get_client(access_token) 
     context = client.metadata('.') 
-    print str(context)
     return pystache2.render_file('viewfiles.mustache', context)
 
 @app.route('/view_files/<path:path>')
@@ -63,8 +62,6 @@ def view_files(path = '.'):
     access_token = TOKEN_STORE[access_token_key] 
     client = get_client(access_token) 
     context = client.metadata(path) 
-    context['fpath'] = context['path'].split('/')[-1:]
-    print str(context)
     if context['is_dir']:
         return pystache2.render_file('viewfiles.mustache', context)
     f, metadata = client.get_file_and_metadata(path)
@@ -84,7 +81,6 @@ def submission():
     access_token = TOKEN_STORE[access_token_key] 
     client = get_client(access_token) 
     str_file = StringIO(forms['submission'])
-    print forms['rev']
     client.put_file(forms['filepath'], str_file, overwrite = True)#,parent_rev = forms['rev'])
     bottle.redirect('/view_files/%s?submit=True'%forms['filepath'])
 
