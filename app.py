@@ -46,7 +46,8 @@ def callback(oauth_token = None):
     TOKEN_STORE[access_token.key] = access_token
     bottle.response.set_cookie('access_token_key', access_token.key)
     print access_token.key
-    return "hi!"
+    return """hi!<br>
+    <a href="http://%s/view_files/Miscellaneous/latinch38.txt" Click here</a>"""%bottle.request.headers['host']
 
 @app.route('/view_files')
 def view_files():
@@ -79,7 +80,8 @@ def submission():
     access_token = TOKEN_STORE[access_token_key] 
     client = get_client(access_token) 
     str_file = StringIO(forms['submission'])
-    client.put_file(forms['filepath'], str_file, parent_rev = forms['rev'])
+    client.put_file(forms['filepath'], str_file)#, parent_rev = forms['rev'])
+    return "Submission successful!"
 
 if __name__ == '__main__':
     app.run(host = 'localhost', port = 8080, debug = True)
